@@ -20,3 +20,4 @@ select_city.on_change('value', update_layout)
 layout = Column(select_country, select_city)
 curdoc().add_root(layout)
 
+print('hola mundo')
