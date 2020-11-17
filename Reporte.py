@@ -2,6 +2,7 @@
 
 import pandas as pd
 import matplotlib.pyplot as plt
+import numpy as np
 
 # Crea una clase que permita obtener información estadística y gráfica de un
 # conjunto de datos de las máquinas de clima en cierto periodo de tiempo
@@ -48,7 +49,54 @@ class report:
         # Número de pruebas
         # Pruebas Ok y No OK
         # Errores más frecuentes
-
+    def plots(self):
+        climas = self.data.loc[self.data['ProcessResult'] != 0]
+        clima1 = climas.loc[(climas['ProcessName'] == 'Clima TWIN 1')]
+        clima2 = climas.loc[(climas['ProcessName'] == 'Clima TWIN 2')]
+        climabk = climas.loc[(climas['ProcessName'] == 'Clima TWIN Backup')]
+        climas_h = []
+        clima1_h = []
+        clima2_h = []
+        climabk_h = []
+        climas_d = []
+        clima1_d = []
+        clima2_d = []
+        climabk_d = []
+        pruebas= [climas, clima1, clima2, climabk]
+        pruebas_h = [climas_h, clima1_h, clima2_h, climabk_h]
+        pruebas_d = [climas_d, clima1_d, clima2_d, climabk_d]
+        for prueba in range(len(pruebas)):
+            for hour in range(24):
+                if hour in pruebas[prueba].index.hour.value_counts():
+                    pruebas_h[prueba].append(pruebas[prueba].index.hour.value_counts()[hour])
+                else:
+                    pruebas_h[prueba].append(0)
+            for day in range(7):
+                if day in pruebas[prueba].index.dayofweek.value_counts():
+                    pruebas_d[prueba].append(pruebas[prueba].index.dayofweek.value_counts()[day])
+                else:
+                    pruebas_d[prueba].append(0)
+                
+        #Esto es para los últimos gráficos
+        b_climabk_h = np.add(clima1_h,clima2_h)
+        b_climabk_d = np.add(clima1_d, clima2_d)
+        days = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo']
+        fig, axs = plt.subplots(5, 2, figsize=(15, 15))
+        axs[0,0].bar(list(range(24)),climas_h)
+        axs[0,1].bar(days,climas_d)
+        axs[1,0].bar(list(range(24)),clima1_h)
+        axs[1,1].bar(days,clima1_d)
+        axs[2,0].bar(list(range(24)),clima2_h)
+        axs[2,1].bar(days,clima2_d)
+        axs[3,0].bar(list(range(24)),climabk_h)
+        axs[3,1].bar(days,climabk_d)
+        axs[4,0].bar(list(range(24)),clima1_h, label="Clima1")
+        axs[4,0].bar(list(range(24)),clima2_h, bottom=clima1_h, label="Clima2")
+        axs[4,0].bar(list(range(24)),climabk_h, bottom=b_climabk_h, label="Climabk")
+        axs[4,1].bar(days,clima1_d, label="Clima1")
+        axs[4,1].bar(days,clima2_d, bottom=clima1_d, label="Clima2")
+        axs[4,1].bar(days,climabk_d, bottom=b_climabk_d, label="Climabk")
+        climas_d = climas.index.dayofweek.value_counts().sort_index()
 
 
 
@@ -58,3 +106,4 @@ class report:
 path = r'C:\Users\alfre\Documents\TT\Modelos\clima_months.pkl'
 report = report(path) # Creando clase
 print(report.data.head())
+report.plots()
